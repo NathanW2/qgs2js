@@ -10,24 +10,40 @@ Main ussage at the moment is for qgis2web (https://github.com/tomchadwin/qgis2we
 
 There is none yet... Main API entry point is `exp2func`
 
-`gen_func_stubs` will generate a string with function stubs for all QGIS functions.
+`gen_func_stubs` will generate function stubs for all registered QGIS functions at the time.
 
 ## Example
 
 Work in progress examples
 
 ```javascript
-//NOT var('myvar') = format('some string %1 %2', 'Hello', 'World')
-function gwly_eval_expression(context) {
+var feature = {
+            COLA: 1,
+            COLB: 2,
+            WAT: 'Hello World'
+        };
+
+var context = {
+            feature: feature,
+            variables: {}
+        };
+
+
+function ueun_eval_expression(context) {
+    // NOT var('myvar') = format('some string %1 %2', 'Hello', 'World')
+
     var feature = context.feature;
     
     return ! (fnc_var(['myvar'], context) == fnc_format(['some string %1 %2','Hello','World'], context)) ;
 }
 
-gwly_eval_expression(context);
+var result = ueun_eval_expression(context);
+console.log(result);
 
-//CASE WHEN to_int(123.52) = var('myvar') THEN to_real(123) WHEN 1 + 2 = 3 THEN 2 ELSE to_int(1) END OR 2 * 2 + 5 = 4
-function bzni_eval_expression(context) {
+
+function rgpj_eval_expression(context) {
+    // CASE WHEN to_int(123.52) = var('myvar') THEN to_real(123) WHEN 1 + 2 = 3 THEN 2 ELSE to_int(1) END OR 2 * 2 + 5 = 4
+
     var feature = context.feature;
     function _CASE() {
     if (fnc_to_int([123.52], context) == fnc_var(['myvar'], context)) {
@@ -43,8 +59,30 @@ function bzni_eval_expression(context) {
     return (_CASE() || (((2 * 2) + 5) == 4));
 }
 
-bzni_eval_expression(context);
+var result = rgpj_eval_expression(context);
+console.log(result);
 
+
+function ppwa_eval_expression(context) {
+    // CASE WHEN COLA = 1 THEN 1 WHEN 1 + 2 = 3 THEN 2 ELSE 3 END
+
+    var feature = context.feature;
+    function _CASE() {
+    if (feature['COLA']  == 1) {
+          return 1;
+        }
+        else if ((1 + 2) == 3) {
+          return 2;
+        }
+    else {
+     return 3;
+    }
+    };
+    return _CASE();
+}
+
+var result = ppwa_eval_expression(context);
+console.log(result);
 
 ```
 

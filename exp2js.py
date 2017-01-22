@@ -1,10 +1,17 @@
 from qgis.core import QgsExpression
 import re
 
-nodes = []
-
 whenfunctions = []
 
+binary_ops = [
+    "||", "&&",
+    "==", "!=", "<=", ">=", "<", ">", "~",
+    "LIKE", "NOT LIKE", "ILIKE", "NOT ILIKE", "===", "!==",
+    "+", "-", "*", "/", "//", "%", "^",
+    "+"
+]
+
+unary_ops = ["!", "-"]
 
 def gen_func_stubs():
     """
@@ -31,22 +38,23 @@ def exp2func(expstr, name=None):
     global whenfunctions
     whenfunctions = []
     exp = QgsExpression(expstr)
-    js = walkExpression(exp.rootNode(), "Leaftlet")
+    js = walkExpression(exp.rootNode(), None)
     if name is None:
         import random
         import string
         name = ''.join(random.choice(string.ascii_lowercase) for _ in range(4))
     temp = """
 function %s_eval_expression(context) {
+    // %s
+
     var feature = context.feature;
     %s
     return %s;
 }""" % (name,
+        exp.dump(),
         "\n".join(whenfunctions),
         js)
-    data = "//" + exp.dump()
-    data += temp
-    return data, name
+    return temp, name, exp.dump()
 
 
 def walkExpression(node, mapLib):
@@ -65,16 +73,6 @@ def walkExpression(node, mapLib):
     elif node.nodeType() == QgsExpression.ntCondition:
         jsExp = handle_condition(node,mapLib)
     return jsExp
-
-binary_ops = [
-    "||", "&&",
-    "==", "!=", "<=", ">=", "<", ">", "~",
-    "LIKE", "NOT LIKE", "ILIKE", "NOT ILIKE", "===", "!==",
-    "+", "-", "*", "/", "//", "%", "^",
-    "+"
-]
-
-unary_ops = ["!", "-"]
 
 
 def handle_condition(node, mapLib):
@@ -182,6 +180,8 @@ def handle_function(node, mapLib):
 
 
 def handle_columnRef(node, mapLib):
+    if mapLib is None:
+        return "feature['%s'] " % node.name()
     if mapLib == "Leaflet":
         return "feature.properties['%s'] " % node.name()
     else:
@@ -189,10 +189,27 @@ def handle_columnRef(node, mapLib):
 
 
 def render_examples():
+    lines = [
+        """var feature = {
+            COLA: 1,
+            COLB: 2,
+            WAT: 'Hello World'
+        };""",
+        """var context = {
+            feature: feature,
+            variables: {}
+        };"""
+    ]
+
     def render_call(name):
         callstr = "var result = {0}_eval_expression(context);".format(name)
         callstr += "\nconsole.log(result);"
         return callstr
+
+    def render_example(exp):
+        data, name, dump = exp2func(exp)
+        lines.append(data)
+        lines.append(render_call(name))
 
     with open("qgsfunctions.js", "w") as f:
         # Write out the functions first.
@@ -200,16 +217,8 @@ def render_examples():
         f.write(funcs)
 
     with open("qgsexpression.js", "w") as f:
-        lines = [
-            "var feature = {};",
-            """var context = {
-                feature: feature
-            };"""
-        ]
         exp = "NOT @myvar = format('some string %1 %2', 'Hello', 'World')"
-        data, name = exp2func(exp)
-        lines.append(data)
-        lines.append(render_call(name))
+        render_example(exp)
         exp = """
         CASE
             WHEN to_int(123.52) = @myvar THEN to_real(123)
@@ -217,21 +226,17 @@ def render_examples():
             ELSE to_int(1)
         END
             OR (2 * 2) + 5 = 4"""
-        data, name = exp2func(exp)
-        lines.append(data)
-        lines.append(render_call(name))
+        render_example(exp)
+        exp = """
+        CASE
+            WHEN "COLA" = 1 THEN 1
+            WHEN (1 + 2) = 3 THEN 2
+            ELSE 3
+        END
+        """
+        render_example(exp)
         f.writelines("\n\n".join(lines))
 
 
 if __name__ == "__main__":
-    # exp = QgsExpression("1 = 1 AND 'Hello' LIKE '%WORLD%' OR \"ColA\" != \"COLB\"")
-    # exp2func(exp)
-    # exp = QgsExpression("@var1 + @var2")
-    # exp2func(exp)
-    # exp = QgsExpression("CASE WHEN 1 = 1 THEN 2 END OR 1 = 2")
-    # exp2func(exp)
-    # exp = QgsExpression("CASE WHEN 1 = 1 THEN 2 WHEN 1 = 2 THEN 2 + 2 ELSE 1 END")
-    # exp2func(exp)
-    # exp = QgsExpression("CASE WHEN 1 = 1 THEN 1 WHEN 1 = 2 THEN 2 ELSE 1 END OR 1 + 2 = 3")
-    # exp2func(exp)
     render_examples()
