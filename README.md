@@ -2,7 +2,7 @@
 
 Converts a QGIS Expression string into a JS function.
 
-Work in progress and no were near complete.
+Work in progress...
 
 Main ussage at the moment is for qgis2web (https://github.com/tomchadwin/qgis2web) by Tom 
 
