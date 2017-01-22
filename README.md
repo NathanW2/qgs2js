@@ -16,32 +16,33 @@ Work in progress examples
 
 ```javascript
 //NOT var('myvar') = format('some string %1 %2', 'Hello', 'World')
-function xtjs_eval_expression(context) {
+function gwly_eval_expression(context) {
     var feature = context.feature;
     
     return ! (fnc_var(['myvar'], context) == fnc_format(['some string %1 %2','Hello','World'], context)) ;
 }
 
-xtjs_eval_expression(context);
+gwly_eval_expression(context);
 
-//CASE WHEN 1 = 1 THEN 1 WHEN 1 = 2 THEN 2 ELSE 1 END OR 2 * 2 + 5 = 4
-function hiel_eval_expression(context) {
+//CASE WHEN to_int(123.52) = var('myvar') THEN to_real(123) WHEN 1 + 2 = 3 THEN 2 ELSE to_int(1) END OR 2 * 2 + 5 = 4
+function bzni_eval_expression(context) {
     var feature = context.feature;
     function _CASE() {
-    if (1 == 1) {
-          return 1;
+    if (fnc_to_int([123.52], context) == fnc_var(['myvar'], context)) {
+          return fnc_to_real([123], context);
         }
-        else if (1 == 2) {
+        else if ((1 + 2) == 3) {
           return 2;
         }
     else {
-     return null;
+     return fnc_to_int([1], context);
     }
     };
     return (_CASE() || (((2 * 2) + 5) == 4));
 }
 
-hiel_eval_expression(context);
+bzni_eval_expression(context);
+
 
 ```
 
