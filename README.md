@@ -10,6 +10,8 @@ Main ussage at the moment is for qgis2web (https://github.com/tomchadwin/qgis2we
 
 There is none yet... Main API entry point is `exp2func`
 
+`gen_func_stubs` will generate a string with function stubs for all QGIS functions.
+
 ## Example
 
 Work in progress examples
