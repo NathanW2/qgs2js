@@ -102,7 +102,10 @@ def handle_condition(node, mapLib):
 
     elsejs = "null"
     if "ELSE" in node.dump():
-        elsejs = "null"
+        elseexps = re.findall("ELSE(\s+.*?\s+)END", node.dump())
+        elsestr = elseexps[0].strip()
+        exp =  QgsExpression(elsestr)
+        elsejs = walkExpression(exp.rootNode(), mapLib)
     funcname = "_CASE()"
     temp = """function %s {
     %s
@@ -199,7 +202,13 @@ def render_examples():
         f.write("\n\n")
         f.write(name + "_eval_expression(context);")
         f.write("\n\n")
-        exp = "CASE WHEN 1 = 1 THEN 1 WHEN 1 = 2 THEN 2 ELSE 1 END OR (2 * 2) + 5 = 4"
+        exp = """
+        CASE
+            WHEN to_int(123.52) = @myvar THEN to_real(123)
+            WHEN (1 + 2) = 3 THEN 2
+            ELSE to_int(1)
+        END
+            OR (2 * 2) + 5 = 4"""
         data, name = exp2func(exp)
         f.write(data)
         f.write("\n\n")
