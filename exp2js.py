@@ -57,6 +57,7 @@ function %s_eval_expression(context) {
     return temp, name, exp.dump()
 
 
+
 def walkExpression(node, mapLib):
     if node.nodeType() == QgsExpression.ntBinaryOperator:
         jsExp = handle_binary(node, mapLib)
@@ -116,10 +117,10 @@ def handle_condition(node, mapLib):
 
 def handle_binary(node, mapLib):
     op = node.op()
+    retOp = binary_ops[op]
     left = node.opLeft()
     right = node.opRight()
     retLeft = walkExpression(left, mapLib)
-    retOp = binary_ops[op]
     retRight = walkExpression(right, mapLib)
     if retOp == "LIKE":
         return "(%s.indexOf(%s) > -1)" % (retLeft[:-1],
@@ -217,6 +218,8 @@ def render_examples():
         f.write(funcs)
 
     with open("qgsexpression.js", "w") as f:
+        exp = "(1 + 1) * 3 + 5"
+        render_example(exp)
         exp = "NOT @myvar = format('some string %1 %2', 'Hello', 'World')"
         render_example(exp)
         exp = """

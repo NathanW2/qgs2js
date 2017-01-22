@@ -28,6 +28,16 @@ var context = {
             variables: {}
         };
 
+function wqjr_eval_expression(context) {
+    // (1 + 1) * 3 + 5
+
+    var feature = context.feature;
+    
+    return (((1 + 1) * 3) + 5);
+}
+
+var result = wqjr_eval_expression(context);
+console.log(result);
 
 function ueun_eval_expression(context) {
     // NOT var('myvar') = format('some string %1 %2', 'Hello', 'World')
@@ -86,4 +96,8 @@ console.log(result);
 
 ```
 
+
+## How does this work?
+
+QGIS will convert the expression into a AST (Abstract Syntax Tree) which makes it easy to walk down each node.  We handle each node and translate it to the JS version of it.
 
