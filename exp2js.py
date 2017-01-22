@@ -7,6 +7,9 @@ whenfunctions = []
 
 
 def gen_func_stubs():
+    """
+    Generate function stubs for QGIS functions.
+    """
     funcs = QgsExpression.Functions()
     functions = []
     temp = """function %s(values, context) {
@@ -21,9 +24,13 @@ def gen_func_stubs():
         functions.append(newfunc)
     return "\n".join(functions)
 
-def exp2func(exp, name=None):
+def exp2func(expstr, name=None):
+    """
+    Convert a QgsExpression into a JS function.
+    """
     global whenfunctions
     whenfunctions = []
+    exp = QgsExpression(expstr)
     js = walkExpression(exp.rootNode(), "Leaftlet")
     if name is None:
         import random
@@ -37,11 +44,9 @@ function %s_eval_expression(context) {
 }""" % (name,
         "\n".join(whenfunctions),
         js)
-    data = "// QGIS EXP:"
-    data += "//" + exp.dump()
-    data += "JS Function:"
+    data = "//" + exp.dump()
     data += temp
-    return temp, name
+    return data, name
 
 
 def walkExpression(node, mapLib):
@@ -87,13 +92,24 @@ def handle_condition(node, mapLib):
         whenjs = walkExpression(whenpart.rootNode(), mapLib)
         thenjs = walkExpression(thenpart.rootNode(), mapLib)
         style = "if" if count == 1 else "else if"
-        js += """%s %s {
-          return %s
+        js += """
+        %s %s {
+          return %s;
         }
         """ % (style, whenjs, thenjs)
+        js = js.strip()
         count += 1
+
+    elsejs = "null"
+    if "ELSE" in node.dump():
+        elsejs = "null"
     funcname = "_CASE()"
-    temp = "function %s {%s};" % (funcname, js)
+    temp = """function %s {
+    %s
+    else {
+     return %s;
+    }
+    };""" % (funcname, js, elsejs)
     whenfunctions.append(temp)
     return funcname
 
@@ -168,6 +184,29 @@ def handle_columnRef(node, mapLib):
     else:
         return "feature.get('%s') " % node.name()
 
+
+def render_examples():
+    with open("qgsfunctions.js", "w") as f:
+        # Write out the functions first.
+        funcs = gen_func_stubs()
+        f.write(funcs)
+
+    with open("qgsexpression.js", "w") as f:
+        # Write out the expression function logic
+        exp = "NOT @myvar = format('some string %1 %2', 'Hello', 'World')"
+        data, name = exp2func(exp)
+        f.write(data)
+        f.write("\n\n")
+        f.write(name + "_eval_expression(context);")
+        f.write("\n\n")
+        exp = "CASE WHEN 1 = 1 THEN 1 WHEN 1 = 2 THEN 2 ELSE 1 END OR (2 * 2) + 5 = 4"
+        data, name = exp2func(exp)
+        f.write(data)
+        f.write("\n\n")
+        f.write(name + "_eval_expression(context);")
+        f.write("\n\n")
+
+
 if __name__ == "__main__":
     # exp = QgsExpression("1 = 1 AND 'Hello' LIKE '%WORLD%' OR \"ColA\" != \"COLB\"")
     # exp2func(exp)
@@ -179,22 +218,4 @@ if __name__ == "__main__":
     # exp2func(exp)
     # exp = QgsExpression("CASE WHEN 1 = 1 THEN 1 WHEN 1 = 2 THEN 2 ELSE 1 END OR 1 + 2 = 3")
     # exp2func(exp)
-    with open("qgsfunctions.js", "w") as f:
-        # Write out the functions first.
-        funcs = gen_func_stubs()
-        f.write(funcs)
-
-    with open("qgsexpression.js", "w") as f:
-        # Write out the expression function logic
-        exp = QgsExpression("NOT @myvar = format('some string %1 %2', 'Hello', 'World')")
-        data, name = exp2func(exp)
-        f.write(data)
-        f.write("\n\n")
-        f.write(name + "_eval_expression(context);")
-        f.write("\n\n")
-        exp = QgsExpression("CASE WHEN 1 = 1 THEN 1 WHEN 1 = 2 THEN 2 ELSE 1 END OR 1 + 2 = 3")
-        data, name = exp2func(exp)
-        f.write(data)
-        f.write("\n\n")
-        f.write(name + "_eval_expression(context);")
-        f.write("\n\n")
+    render_examples()
