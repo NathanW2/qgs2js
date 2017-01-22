@@ -189,19 +189,27 @@ def handle_columnRef(node, mapLib):
 
 
 def render_examples():
+    def render_call(name):
+        callstr = "var result = {0}_eval_expression(context);".format(name)
+        callstr += "\nconsole.log(result);"
+        return callstr
+
     with open("qgsfunctions.js", "w") as f:
         # Write out the functions first.
         funcs = gen_func_stubs()
         f.write(funcs)
 
     with open("qgsexpression.js", "w") as f:
-        # Write out the expression function logic
+        lines = [
+            "var feature = {};",
+            """var context = {
+                feature: feature
+            };"""
+        ]
         exp = "NOT @myvar = format('some string %1 %2', 'Hello', 'World')"
         data, name = exp2func(exp)
-        f.write(data)
-        f.write("\n\n")
-        f.write(name + "_eval_expression(context);")
-        f.write("\n\n")
+        lines.append(data)
+        lines.append(render_call(name))
         exp = """
         CASE
             WHEN to_int(123.52) = @myvar THEN to_real(123)
@@ -210,10 +218,9 @@ def render_examples():
         END
             OR (2 * 2) + 5 = 4"""
         data, name = exp2func(exp)
-        f.write(data)
-        f.write("\n\n")
-        f.write(name + "_eval_expression(context);")
-        f.write("\n\n")
+        lines.append(data)
+        lines.append(render_call(name))
+        f.writelines("\n\n".join(lines))
 
 
 if __name__ == "__main__":
