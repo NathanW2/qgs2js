@@ -16,6 +16,9 @@ There is none yet... Main API entry point is `exp2func`
 
 Work in progress examples
 
+
+A super simple example.
+
 ```javascript
 var feature = {
             COLA: 1,
@@ -38,7 +41,9 @@ function wqjr_eval_expression(context) {
 
 var result = wqjr_eval_expression(context);
 console.log(result);
+```
 
+```javascript
 function ueun_eval_expression(context) {
     // NOT var('myvar') = format('some string %1 %2', 'Hello', 'World')
 
@@ -49,8 +54,11 @@ function ueun_eval_expression(context) {
 
 var result = ueun_eval_expression(context);
 console.log(result);
+```
 
+A more complicated example with columns, functions, case, and OR.
 
+```javascript
 function rgpj_eval_expression(context) {
     // CASE WHEN to_int(123.52) = var('myvar') THEN to_real(123) WHEN 1 + 2 = 3 THEN 2 ELSE to_int(1) END OR 2 * 2 + 5 = 4
 
@@ -71,8 +79,11 @@ function rgpj_eval_expression(context) {
 
 var result = rgpj_eval_expression(context);
 console.log(result);
+```
 
+Comparing columns in a case statement.
 
+```javascript
 function ppwa_eval_expression(context) {
     // CASE WHEN COLA = 1 THEN 1 WHEN 1 + 2 = 3 THEN 2 ELSE 3 END
 
