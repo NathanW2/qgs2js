@@ -21,19 +21,27 @@ def gen_func_stubs():
         functions.append(newfunc)
     return "\n".join(functions)
 
-def exp2func(exp):
+def exp2func(exp, name=None):
     global whenfunctions
     whenfunctions = []
     js = walkExpression(exp.rootNode(), "Leaftlet")
+    if name is None:
+        import random
+        import string
+        name = ''.join(random.choice(string.ascii_lowercase) for _ in range(4))
     temp = """
-function eval_expression(feature) { %s
+function %s_eval_expression(context) {
+    var feature = context.feature;
+    %s
     return %s;
-}""" % ("\n".join(whenfunctions), js)
+}""" % (name,
+        "\n".join(whenfunctions),
+        js)
     data = "// QGIS EXP:"
     data += "//" + exp.dump()
     data += "JS Function:"
     data += temp
-    return temp
+    return temp, name
 
 
 def walkExpression(node, mapLib):
@@ -151,7 +159,7 @@ def handle_function(node, mapLib):
     for arg in args:
         retArgs.append(walkExpression(arg, mapLib))
     retArgs = ",".join(retArgs)
-    return "fnc_%s([%s], feature, context)" % (retFunc, retArgs)
+    return "fnc_%s([%s], context)" % (retFunc, retArgs)
 
 
 def handle_columnRef(node, mapLib):
@@ -178,6 +186,15 @@ if __name__ == "__main__":
 
     with open("qgsexpression.js", "w") as f:
         # Write out the expression function logic
-        exp = QgsExpression("@myvar + format('some string %1 % 2', 'Hello', 'World')")
-        data = exp2func(exp)
+        exp = QgsExpression("NOT @myvar = format('some string %1 %2', 'Hello', 'World')")
+        data, name = exp2func(exp)
         f.write(data)
+        f.write("\n\n")
+        f.write(name + "_eval_expression(context);")
+        f.write("\n\n")
+        exp = QgsExpression("CASE WHEN 1 = 1 THEN 1 WHEN 1 = 2 THEN 2 ELSE 1 END OR 1 + 2 = 3")
+        data, name = exp2func(exp)
+        f.write(data)
+        f.write("\n\n")
+        f.write(name + "_eval_expression(context);")
+        f.write("\n\n")
