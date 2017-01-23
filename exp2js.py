@@ -212,12 +212,16 @@ def render_examples():
         lines.append(data)
         lines.append(render_call(name))
 
-    with open("qgsfunctions.js", "w") as f:
+    import os
+    if not os.path.exists("examples"):
+        os.mkdir("examples")
+
+    with open("examples\qgsfunctions.js", "w") as f:
         # Write out the functions first.
         funcs = gen_func_stubs()
         f.write(funcs)
 
-    with open("qgsexpression.js", "w") as f:
+    with open("examples\qgsexpression.js", "w") as f:
         exp = "(1 + 1) * 3 + 5"
         render_example(exp)
         exp = "NOT @myvar = format('some string %1 %2', 'Hello', 'World')"
@@ -239,7 +243,6 @@ def render_examples():
         """
         render_example(exp)
         f.writelines("\n\n".join(lines))
-
 
 if __name__ == "__main__":
     render_examples()

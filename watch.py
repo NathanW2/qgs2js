@@ -1,3 +1,6 @@
+# Just so we can get sip v2
+import qgis
+
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 import os
