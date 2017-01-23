@@ -31,6 +31,14 @@ def gen_func_stubs():
         functions.append(newfunc)
     return "\n".join(functions)
 
+
+def compile(expstr, name=None):
+    """
+    Convert a QgsExpression into a JS function.
+    """
+    return exp2func(expstr, name)
+
+
 def exp2func(expstr, name=None):
     """
     Convert a QgsExpression into a JS function.

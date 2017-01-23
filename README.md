@@ -8,9 +8,14 @@ Main ussage at the moment is for qgis2web (https://github.com/tomchadwin/qgis2we
 
 ## Usage
 
-There is none yet... Main API entry point is `exp2func`
+```python
+import qgs2js
+functionjs, name = qgs2js.compile("1 + 1")
 
-`gen_func_stubs` will generate function stubs for all registered QGIS functions at the time.
+# Put the functionjs and call to name in your JS string.
+outputjs = functionjs
+outputjs += name + "(context)"
+```
 
 ## Example
 
