@@ -36,7 +36,7 @@ def compile(expstr, name=None, mapLib=None):
     """
     Convert a QgsExpression into a JS function.
     """
-    return exp2func(expstr, name, mapLib=None)
+    return exp2func(expstr, name, mapLib)
 
 
 def exp2func(expstr, name=None, mapLib=None):
