@@ -32,21 +32,21 @@ def gen_func_stubs():
     return "\n".join(functions)
 
 
-def compile(expstr, name=None):
+def compile(expstr, name=None, mapLib=None):
     """
     Convert a QgsExpression into a JS function.
     """
-    return exp2func(expstr, name)
+    return exp2func(expstr, name, mapLib=None)
 
 
-def exp2func(expstr, name=None):
+def exp2func(expstr, name=None, mapLib=None):
     """
     Convert a QgsExpression into a JS function.
     """
     global whenfunctions
     whenfunctions = []
     exp = QgsExpression(expstr)
-    js = walkExpression(exp.rootNode(), None)
+    js = walkExpression(exp.rootNode(), mapLib=mapLib)
     if name is None:
         import random
         import string
@@ -216,7 +216,7 @@ def render_examples():
         return callstr
 
     def render_example(exp):
-        data, name, dump = exp2func(exp)
+        data, name, dump = exp2func(exp, mapLib="Leaflet")
         lines.append(data)
         lines.append(render_call(name))
 
