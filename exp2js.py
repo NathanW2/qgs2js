@@ -51,8 +51,9 @@ def exp2func(expstr, name=None, mapLib=None):
         import random
         import string
         name = ''.join(random.choice(string.ascii_lowercase) for _ in range(4))
+    name += "_eval_expression"
     temp = """
-function %s_eval_expression(context) {
+function %s(context) {
     // %s
 
     var feature = context.feature;
@@ -211,7 +212,7 @@ def render_examples():
     ]
 
     def render_call(name):
-        callstr = "var result = {0}_eval_expression(context);".format(name)
+        callstr = "var result = {0}(context);".format(name)
         callstr += "\nconsole.log(result);"
         return callstr
 
