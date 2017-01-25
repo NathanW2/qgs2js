@@ -254,13 +254,13 @@ def render_examples():
         f.writelines("\n\n".join(lines))
 
 
-def compile_to_file(exp, mapLib=None, filename="expressions.js"):
+def compile_to_file(exp, name=None, mapLib=None, filename="expressions.js"):
     """
     Generate JS function to file from exp and append it to the end of the given file name.
     :param exp: The expression to export to JS
     :return: The name of the function you can call.
     """
-    functionjs, name, _ = compile(exp, mapLib=None)
+    functionjs, name, _ = compile(exp, name=name, mapLib=mapLib)
     with open(filename, "a") as f:
         f.write("\n\n")
         f.write(functionjs)
