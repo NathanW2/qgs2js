@@ -271,7 +271,7 @@ function fnc_day_of_week(values, context) {
 };
 
 function fnc_lower(values, context) {
-    return false;
+    return values[0].toLowerCase();
 };
 
 function fnc_upper(values, context) {
